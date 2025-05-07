@@ -1,9 +1,14 @@
-function App() {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-3xl font-bold text-blue-600">Bienvenido</h1>
-    </div>
-  );
-}
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./features/auth/AuthProvider";
+import AppRoutes from "./routes";
+
+const App: React.FC = () => (
+  <AuthProvider>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </AuthProvider>
+);
 
 export default App;
