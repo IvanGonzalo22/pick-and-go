@@ -1,1 +1,0 @@
-// Product card that will be shown in cart without role logic
