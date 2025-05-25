@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using PickAndGo.Api.Features.Auth.Services;
-using PickAndGo.Api.Infrastructure.Persistence;
+using server.Features.Auth.Services;
+using server.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,4 +16,8 @@ var app = builder.Build();
 
 app.UseRouting();
 app.MapControllers();
+
+// Fuerza la escucha en http://localhost:5000
+app.Urls.Clear();
+app.Urls.Add("http://localhost:5000");
 app.Run();

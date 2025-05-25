@@ -1,32 +1,58 @@
-// client/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/',
+  server: {
+    proxy: {
+      '/auth': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/products': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/cart': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/orders': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/settings': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
       // registra el SW en cuanto cargue la app
       registerType: 'autoUpdate',
-      // inyecta un pequeño <script> en tu index.html para autómaticamente
-      // hacer navigator.serviceWorker.register('/sw.js')
-      injectRegister: 'script',
-
-      // Incluye estos assets estáticos en la carpeta de salida para que tu
-      // manifest y SW los vean (favicon, robots.txt, iconos…)
+      injectRegister: 'inline',
+      workbox: {
+        // as soon as the new SW installs, activate it:
+        skipWaiting: true,
+        clientsClaim: true,
+      },
       includeAssets: [
         'favicon.ico',
         'robots.txt',
         'icons/favicon-192x192.png',
         'icons/favicon-512x512.png'
       ],
-
-      // Genera un manifest.webmanifest con todos estos campos:
       manifest: {
         name:            'PickAndGo!',
-        short_name:      'PickAndGo',
+        short_name: 'PickAndGo v1.0.1',
         description:     'Pide y recoge sin colas en la cafetería',
         theme_color:     '#ffffff',
         background_color:'#ffffff',
@@ -34,7 +60,6 @@ export default defineConfig({
         orientation:     'portrait',
         scope:           '/',
         start_url:       '/',
-
         icons: [
           {
             src:     'icons/favicon-192x192.png',

@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PickAndGo.Api.Features.Auth.DTOs;
-using PickAndGo.Api.Features.Auth.Services;
+using server.Features.Auth.DTOs;
+using server.Features.Auth.Services;
 
-namespace PickAndGo.Api.Features.Auth.Controllers
+namespace server.Features.Auth.Controllers
 {
     [ApiController]
     [Route("auth")]

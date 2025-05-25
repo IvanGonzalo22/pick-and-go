@@ -1,17 +1,21 @@
+// src/layout/Header.tsx
 import { useAuth } from '../features/auth/hooks/useAuth';
 
 export default function Header() {
   const { logout, user } = useAuth();
 
   return (
-    <header className="flex justify-between items-center p-4 bg-white shadow">
-      <h1 className="text-xl font-bold">PickAndGo!</h1>
+    <header className="relative p-4 bg-white shadow">
+      {/* Título absolutamente centrado */}
+      <h1 className="text-center text-xl font-bold text-gray-800">PickAndGo!</h1>
+
       {user && (
         <button
           onClick={logout}
-          className="px-3 py-1 text-sm text-red-600 hover:underline"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 font-medium"
+          aria-label="Salir"
         >
-          Cerrar sesión
+          Salir
         </button>
       )}
     </header>

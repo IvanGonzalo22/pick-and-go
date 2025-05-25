@@ -1,3 +1,4 @@
+// features/auth/pages/RegisterEmployeePage.tsx
 import React, { useState } from 'react';
 import { API } from '../../../common/utils/api';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +20,7 @@ export default function RegisterEmployeePage() {
         email,
         password
       });
-      nav('/login');
+      nav('/settings');
     } catch {
       setErr('Error al registrar al empleado');
     }
@@ -28,8 +29,9 @@ export default function RegisterEmployeePage() {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <form onSubmit={onSubmit} className="w-full max-w-sm p-6 bg-white rounded shadow">
-        <h2 className="mb-4 text-2xl font-semibold">Registro Empleado</h2>
-        {err && <p className="mb-2 text-red-600">{err}</p>}
+        <h2 className="mb-4 text-2xl font-semibold text-center">Registro Empleado</h2>
+        {err && <p className="mb-2 text-red-600 text-center">{err}</p>}
+
         <label className="block mb-2">
           Nombre
           <input
@@ -37,9 +39,10 @@ export default function RegisterEmployeePage() {
             value={firstName}
             onChange={e => setFirstName(e.target.value)}
             required
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded mt-1"
           />
         </label>
+
         <label className="block mb-2">
           Apellidos
           <input
@@ -47,9 +50,10 @@ export default function RegisterEmployeePage() {
             value={lastName}
             onChange={e => setLastName(e.target.value)}
             required
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded mt-1"
           />
         </label>
+
         <label className="block mb-2">
           Correo
           <input
@@ -57,9 +61,10 @@ export default function RegisterEmployeePage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded mt-1"
           />
         </label>
+
         <label className="block mb-4">
           Contraseña
           <input
@@ -67,16 +72,26 @@ export default function RegisterEmployeePage() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded mt-1"
           />
         </label>
+
         <button
           type="submit"
-          className="w-full py-2 mb-2 text-white bg-yellow-500 rounded"
+          className="w-full py-2 mb-4 text-white bg-green-500 rounded hover:bg-green-600 transition-colors duration-200"
         >
           Crear empleado
         </button>
-        <a href="/login" className="text-blue-500">Volver al login</a>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => nav('/settings')}
+            className="text-blue-500 hover:underline text-sm"
+          >
+            Volver a ajustes
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -3,11 +3,11 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using PickAndGo.Api.Features.Auth.DTOs;
-using PickAndGo.Api.Features.Auth.Models;
-using PickAndGo.Api.Infrastructure.Persistence;
+using server.Features.Auth.DTOs;
+using server.Features.Auth.Models;
+using server.Infrastructure.Persistence;
 
-namespace PickAndGo.Api.Features.Auth.Services
+namespace server.Features.Auth.Services
 {
     public class AuthService
     {
@@ -62,11 +62,13 @@ namespace PickAndGo.Api.Features.Auth.Services
             if (user == null)
                 throw new Exception("Credenciales inválidas");
 
+            // Reconstruir intento de hash con la misma sal:
             byte[] attempt = SHA256.HashData(
                 System.Text.Encoding.UTF8.GetBytes(dto.Password)
                 .Concat(user.Salt).ToArray()
             );
 
+            // Comparar timing-safe:
             if (!CryptographicOperations.FixedTimeEquals(attempt, user.PasswordHash))
                 throw new Exception("Credenciales inválidas");
 

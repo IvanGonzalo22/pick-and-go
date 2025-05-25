@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using PickAndGo.Api.Features.Auth.Models;
+using server.Features.Auth.Models;
 
-namespace PickAndGo.Api.Infrastructure.Persistence
+namespace server.Infrastructure.Persistence
 {
     public class AppDbContext : DbContext
     {

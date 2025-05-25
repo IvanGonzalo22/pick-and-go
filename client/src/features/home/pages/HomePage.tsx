@@ -1,11 +1,13 @@
 // src/features/home/pages/HomePage.tsx
-import React from 'react';
 import { useAuth } from '../../auth/hooks/useAuth';
 
 export default function HomePage() {
   const { user } = useAuth();
+  const role = user?.role ?? 'Client';
   const greeting =
-    user?.role === 'Employee'
+    role === 'SuperAdmin'
+      ? 'Bienvenido, administrador'
+      : role === 'Employee'
       ? 'Bienvenido, empleado'
       : 'Bienvenido, cliente';
 

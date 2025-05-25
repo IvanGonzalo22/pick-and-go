@@ -1,24 +1,45 @@
+// src/App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterClientPage from './features/auth/pages/RegisterClientPage';
 import RegisterEmployeePage from './features/auth/pages/RegisterEmployeePage';
 import HomePage from './features/home/pages/HomePage';
+import ProductsPage from './features/products/pages/ProductsPage';
+import CartPage from './features/cart/pages/CartPage';
+import OrdersPage from './features/orders/pages/OrdersPage';
+import SettingsPage from './features/settings/pages/SettingsPage';
 import AppLayout from './layout/AppLayout';
 import { useAuth } from './features/auth/hooks/useAuth';
 
+// Ruta que comprueba autenticación:
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
   return user ? children : <Navigate to="/login" replace />;
 };
 
+// Ruta que comprueba rol:
+const RoleProtected = ({
+  children,
+  roles
+}: {
+  children: JSX.Element;
+  roles: string[];
+}) => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return roles.includes(user.role) ? children : <Navigate to="/" replace />;
+};
+
 export default function App() {
   return (
     <Routes>
+      {/* Público */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register-client" element={<RegisterClientPage />} />
       <Route path="/register-employee" element={<RegisterEmployeePage />} />
 
+      {/* Privado */}
       <Route
         path="/"
         element={
@@ -27,9 +48,18 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        {/* Hasta que no esté logueado, el ProtectedRoute me redirige a /login*/}
-        <Route path="HomePage" element={<HomePage />} />
-        {/* Rutas posteriores: /products, /cart, /orders, /settings */}
+        <Route index element={<HomePage />} />
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route
+          path="orders"
+          element={
+            <RoleProtected roles={['Employee', 'SuperAdmin']}>
+              <OrdersPage />
+            </RoleProtected>
+          }
+        />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
