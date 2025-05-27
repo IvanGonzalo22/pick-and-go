@@ -25,4 +25,16 @@ namespace server.Features.Auth.DTOs
         public string Email      { get; set; } = null!;
         public string Role       { get; set; } = null!;
     }
+
+    public class ForgotDto
+    {
+        public string Email { get; set; } = null!;
+    }
+    
+    public class ResetDto
+    {
+        public Guid Code { get; set; }
+        public string NewPassword { get; set; } = null!;
+    }
+
 }

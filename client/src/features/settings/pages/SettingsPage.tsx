@@ -14,7 +14,7 @@ export default function SettingsPage() {
       {user?.role === 'SuperAdmin' && (
         <button
           onClick={() => nav('/register-employee')}
-          className="px-4 py-2 bg-blue-500 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
+          className="px-4 py-2 bg-blue-500 text-white bg-green-500 rounded hover:bg-green-600 transition-colors duration-200"
         >
           Crear usuario empleado
         </button>

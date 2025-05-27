@@ -4,6 +4,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterClientPage from './features/auth/pages/RegisterClientPage';
 import RegisterEmployeePage from './features/auth/pages/RegisterEmployeePage';
+import ForgotPasswordPage from './features/auth/pages/ForgotPasswordPage';    // <-- importar
+import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';      // <-- importar
 import HomePage from './features/home/pages/HomePage';
 import ProductsPage from './features/products/pages/ProductsPage';
 import CartPage from './features/cart/pages/CartPage';
@@ -34,12 +36,16 @@ const RoleProtected = ({
 export default function App() {
   return (
     <Routes>
-      {/* Público */}
+      {/* PÚBLICAS */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register-client" element={<RegisterClientPage />} />
       <Route path="/register-employee" element={<RegisterEmployeePage />} />
 
-      {/* Privado */}
+      {/* Rutas para reseteo de contraseña */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      {/* PRIVADAS bajo AppLayout */}
       <Route
         path="/"
         element={
@@ -62,6 +68,7 @@ export default function App() {
         <Route path="settings" element={<SettingsPage />} />
       </Route>
 
+      {/* Cualquier otra ruta redirige a home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

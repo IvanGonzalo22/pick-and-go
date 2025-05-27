@@ -72,11 +72,11 @@ export default function RegisterClientPage() {
         </label>
         <button
           type="submit"
-          className="w-full py-2 mb-2 text-white bg-green-500 rounded"
+          className="w-full py-2 mb-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
         >
           Crear cuenta
         </button>
-        <a href="/login" className="text-blue-500">Volver al login</a>
+        <a href="/login" className="text-sm text-blue-500 hover:underline">Volver al login</a>
       </form>
     </div>
   );

@@ -82,16 +82,13 @@ export default function RegisterEmployeePage() {
         >
           Crear empleado
         </button>
-
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => nav('/settings')}
-            className="text-blue-500 hover:underline text-sm"
-          >
-            Volver a ajustes
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => nav('/settings')}
+          className="text-blue-500 hover:underline text-sm"
+        >
+          Volver a ajustes
+        </button>
       </form>
     </div>
   );

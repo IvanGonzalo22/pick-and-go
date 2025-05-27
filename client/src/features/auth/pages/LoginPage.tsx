@@ -1,7 +1,7 @@
-// features/auth/pages/LoginPage.tsx
+// src/features/auth/pages/LoginPage.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -63,17 +63,19 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full py-2 mb-4 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
+          className="w-full py-2 mb-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
         >
           Entrar
         </button>
 
-        <p className="text-center text-sm text-gray-600">
-          ¿No tienes cuenta aún?{' '}
-          <a href="/register-client" className="text-blue-500 hover:underline">
+        <div className="flex justify-between text-sm text-blue-500">
+          <Link to="/forgot-password" className="hover:underline">
+            ¿Has olvidado la contraseña?
+          </Link>
+          <Link to="/register-client" className="hover:underline">
             Crear cuenta
-          </a>
-        </p>
+          </Link>
+        </div>
       </form>
     </div>
   );

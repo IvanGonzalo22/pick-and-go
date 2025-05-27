@@ -8,7 +8,6 @@ namespace server.Features.Auth.Models
         [Key]
         public Guid Id { get; set; }
 
-        // Inicializar cada propiedad de referencia con un valor por defecto en lugar de null para evitar warnings en consola
         [Required, MaxLength(100)]
         public string FirstName   { get; set; } = string.Empty;
 
@@ -25,8 +24,15 @@ namespace server.Features.Auth.Models
         public byte[] Salt        { get; set; } = Array.Empty<byte>();
 
         [Required, MaxLength(50)]
-        public string Role        { get; set; } = string.Empty;  // 'Client','Employee','SuperAdmin'
+        public string Role        { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; }
+
+        // --- Nuevas columnas para reseteo de contraseña ---
+        public Guid?   PasswordResetCode    { get; set; }
+        public DateTime? PasswordResetExpires{ get; set; }
+
+        // Fecha en que realmente cambió la contraseña (solo al resetear)
+        public DateTime? PasswordLastChanged { get; set; }
     }
 }
