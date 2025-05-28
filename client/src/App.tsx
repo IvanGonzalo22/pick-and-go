@@ -4,8 +4,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterClientPage from './features/auth/pages/RegisterClientPage';
 import RegisterEmployeePage from './features/auth/pages/RegisterEmployeePage';
-import ForgotPasswordPage from './features/auth/pages/ForgotPasswordPage';    // <-- importar
-import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';      // <-- importar
+import ForgotPasswordPage from './features/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';
 import HomePage from './features/home/pages/HomePage';
 import ProductsPage from './features/products/pages/ProductsPage';
 import CartPage from './features/cart/pages/CartPage';

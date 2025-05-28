@@ -24,7 +24,7 @@ namespace server.Features.Auth.Models
         public byte[] Salt        { get; set; } = Array.Empty<byte>();
 
         [Required, MaxLength(50)]
-        public string Role        { get; set; } = string.Empty;
+        public string Role        { get; set; } = string.Empty; // 'Client','Employee','SuperAdmin'
 
         public DateTime CreatedAt { get; set; }
 
