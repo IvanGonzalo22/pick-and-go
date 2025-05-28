@@ -1,10 +1,9 @@
-// src/features/products/components/EditProductModal.tsx
+// src/features/products/components/CreateProductModal.tsx
 import React, { useState, useEffect } from 'react';
 import { Product } from './ProductCard';
 
-interface EditProductModalProps {
-  product: Product;
-  onSave: (updated: Product) => void;
+interface CreateProductModalProps {
+  onCreate: (newProduct: Product) => void;
   onCancel: () => void;
 }
 
@@ -14,29 +13,43 @@ const CATEGORY_OPTIONS = [
   { value: 'dulces-bolleria',    label: 'Dulces y bollería',    sub: ['todo','croissant','muffin','donut'] },
 ];
 
-export function EditProductModal({ product, onSave, onCancel }: EditProductModalProps) {
-  const [name, setName] = useState(product.name);
-  const [price, setPrice] = useState(product.price);
-  const [stock, setStock] = useState(product.stock);
-  const [imageUrl, setImageUrl] = useState(product.imageUrl);
-  const [comment, setComment] = useState(product.comment || '');
-  const [category, setCategory] = useState(product.category);
-  const [subcats, setSubcats] = useState<string[]>([]);
-  const [subcategory, setSubcategory] = useState(product.subcategory);
+export function CreateProductModal({ onCreate, onCancel }: CreateProductModalProps) {
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState(0);
+  const [stock, setStock] = useState(1);
+  const [imageUrl, setImageUrl] = useState('');
+  const [comment, setComment] = useState('');
+  const [category, setCategory] = useState(CATEGORY_OPTIONS[0].value);
+  const [subcats, setSubcats] = useState<string[]>(CATEGORY_OPTIONS[0].sub);
+  const [subcategory, setSubcategory] = useState('todo');
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const opt = CATEGORY_OPTIONS.find(o => o.value === category)!;
     setSubcats(opt.sub);
-    if (!opt.sub.includes(subcategory)) {
-      setSubcategory('todo');
-    }
+    setSubcategory('todo');
   }, [category]);
+
+  const handleSave = () => {
+    const newProd: Product = {
+      id: Date.now().toString(),
+      name,
+      price,
+      stock,
+      imageUrl,
+      comment,
+      category,
+      subcategory,
+      visible,             // <-- siempre true a menos que el empleado lo cambie
+    };
+    onCreate(newProd);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-white rounded shadow p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Editar producto</h2>
-        {/* Campos básicos */}
+        <h2 className="text-xl font-semibold mb-4">Crear producto</h2>
+
         <label className="block mb-2">
           Nombre
           <input
@@ -45,6 +58,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setName(e.target.value)}
           />
         </label>
+
         <label className="block mb-2">
           Precio
           <input
@@ -54,6 +68,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setPrice(Number(e.target.value))}
           />
         </label>
+
         <label className="block mb-2">
           Stock
           <input
@@ -63,6 +78,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setStock(Number(e.target.value))}
           />
         </label>
+
         <label className="block mb-2">
           URL imagen
           <input
@@ -72,7 +88,6 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
           />
         </label>
 
-        {/* Ahora categoría y subcategoría */}
         <label className="block mb-2">
           Categoría
           <select
@@ -85,6 +100,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             ))}
           </select>
         </label>
+
         <label className="block mb-2">
           Subcategoría
           <select
@@ -100,7 +116,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
           </select>
         </label>
 
-        <label className="block mb-4">
+        <label className="block mb-2">
           Comentarios
           <textarea
             className="w-full border rounded px-2 py-1"
@@ -109,16 +125,21 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setComment(e.target.value)}
           />
         </label>
+
+        <label className="flex items-center mb-4 space-x-2">
+          <input
+            type="checkbox"
+            checked={visible}
+            onChange={e => setVisible(e.target.checked)}
+          />
+          <span>Visible para clientes</span>
+        </label>
+
         <div className="flex justify-end space-x-2">
           <button className="px-4 py-2 bg-gray-300 rounded" onClick={onCancel}>
             Cancelar
           </button>
-          <button
-            className="px-4 py-2 bg-green-500 text-white rounded"
-            onClick={() =>
-              onSave({ ...product, name, price, stock, imageUrl, comment, category, subcategory })
-            }
-          >
+          <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleSave}>
             Aceptar
           </button>
         </div>

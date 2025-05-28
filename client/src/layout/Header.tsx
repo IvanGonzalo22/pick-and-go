@@ -15,7 +15,7 @@ export default function Header() {
           className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 font-medium"
           aria-label="Salir"
         >
-          Salir
+          ← Salir
         </button>
       )}
     </header>

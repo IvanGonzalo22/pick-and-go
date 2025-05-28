@@ -9,6 +9,8 @@ namespace server.Infrastructure.Persistence
 
         public DbSet<User> Users { get; set; }
 
-        // ... otros DbSet para productos, carrito, pedidos ...
+        public DbSet<server.Features.Products.Models.Product> Products { get; set; }
+
+        // ... otros DbSet para carrito, pedidos ...
     }
 }
