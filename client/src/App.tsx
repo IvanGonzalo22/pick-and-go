@@ -11,6 +11,7 @@ import ProductsPage from './features/products/pages/ProductsPage';
 import CartPage from './features/cart/pages/CartPage';
 import OrdersPage from './features/orders/pages/OrdersPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
+import HistoryPage from './features/history/pages/HistoryPage'; // Import añadido
 import AppLayout from './layout/AppLayout';
 import { useAuth } from './features/auth/hooks/useAuth';
 
@@ -36,16 +37,16 @@ const RoleProtected = ({
 export default function App() {
   return (
     <Routes>
-      {/* PÚBLICAS */}
+      {/* RUTAS PÚBLICAS */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register-client" element={<RegisterClientPage />} />
       <Route path="/register-employee" element={<RegisterEmployeePage />} />
 
-      {/* Rutas para reseteo de contraseña */}
+      {/* RUTAS DE RESETEO DE CONTRASEÑA */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-      {/* PRIVADAS bajo AppLayout */}
+      {/* RUTAS PRIVADAS BAJO AppLayout */}
       <Route
         path="/"
         element={
@@ -57,6 +58,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="cart" element={<CartPage />} />
+        <Route path="history" element={<HistoryPage />} /> {/* Ruta de Historial */}
         <Route
           path="orders"
           element={
@@ -68,7 +70,7 @@ export default function App() {
         <Route path="settings" element={<SettingsPage />} />
       </Route>
 
-      {/* Cualquier otra ruta redirige a home */}
+      {/* Cualquier otra ruta redirige a Home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

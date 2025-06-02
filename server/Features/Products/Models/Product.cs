@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace server.Features.Products.Models
 {
@@ -12,6 +13,7 @@ namespace server.Features.Products.Models
         public string Name { get; set; } = string.Empty;
 
         [Required, DataType(DataType.Currency)]
+        [Column(TypeName = "decimal(18,2)")]       // <-- Precisión y escala explícitas
         public decimal Price { get; set; }
 
         [Required]

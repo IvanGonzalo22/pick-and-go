@@ -1,35 +1,43 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import fs from 'fs';
+import path from 'path';
 
 export default defineConfig({
   base: '/',
   server: {
-    host: '0.0.0.0',    // ← escucha en todas las IPs IPv4
-    allowedHosts: true, // ← desactiva chequear el host en dev
+    // Habilitar HTTPS con certificados locales
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'cert/localhost-key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'cert/localhost.pem')),
+    },
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: true,
     proxy: {
       '/auth': {
-        target: 'http://localhost:5000',
+        target: 'https://localhost:5001',
         changeOrigin: true,
         secure: false
       },
       '/products': {
-        target: 'http://localhost:5000',
+        target: 'https://localhost:5001',
         changeOrigin: true,
         secure: false
       },
       '/cart': {
-        target: 'http://localhost:5000',
+        target: 'https://localhost:5001',
         changeOrigin: true,
         secure: false
       },
       '/orders': {
-        target: 'http://localhost:5000',
+        target: 'https://localhost:5001',
         changeOrigin: true,
         secure: false
       },
       '/settings': {
-        target: 'http://localhost:5000',
+        target: 'https://localhost:5001',
         changeOrigin: true,
         secure: false
       }
@@ -77,4 +85,4 @@ export default defineConfig({
       }
     })
   ]
-})
+});

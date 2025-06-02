@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { useProducts } from '../hooks/useProducts';
-import { ProductCard, Product } from '../components/ProductCard';
+import type { Product } from '../components/ProductCard';
+import { ProductCard } from '../components/ProductCard';
 import { EditProductModal } from '../components/EditProductModal';
 import { CreateProductModal } from '../components/CreateProductModal';
-import { ConfirmModal } from '../components/ConfirmModal';
-import { API } from '../../../common/utils/api';
+import { ConfirmModal } from '../../../common/components/ConfirmModal';
+import { useCart } from '../../cart/hooks/useCart';
 
 const CATEGORIES = [
   { key: 'bocatas-sandwiches', label: 'Bocatas y sándwiches', img: '/imgs/bocata.jpg' },
@@ -33,22 +34,28 @@ export default function ProductsPage() {
     deleteProduct
   } = useProducts();
 
+  const { addItem } = useCart();
+
+  // Vista: categorías o productos
   const [view, setView] = useState<'categories'|'products'>('categories');
   const [category, setCategory] = useState<string>('');
   const [subcategory, setSubcategory] = useState<string>('todo');
   const [sortOrder, setSortOrder] = useState<'alpha'|'price-asc'|'price-desc'>('alpha');
-  const [modalProduct, setModalProduct] = useState<Product|null>(null);
+
+  // Modales
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [confirmToggle, setConfirmToggle] = useState<{ id: string; visible: boolean } | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [modal, setModal] = useState<{
+    type: 'alert' | 'confirm';
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void> | void;
+    onCancel?: () => void;
+    confirmText?: string;
+    cancelText?: string;
+  } | null>(null);
 
-  // switch to product list view
-  const handleSelectCategory = (key: string) => {
-    setCategory(key);
-    setView('products');
-  };
-
-  // filter, subcategory & sort
+  // Filtros y orden
   const filtered = products
     .filter(p => p.category === category)
     .filter(p => subcategory === 'todo' ? true : p.subcategory === subcategory)
@@ -57,28 +64,73 @@ export default function ProductsPage() {
       if (sortOrder === 'price-asc') return a.price - b.price;
       return b.price - a.price;
     });
-
-  // employee sees all, client only visible
   const displayProducts = filtered.filter(p => isEmployee ? true : p.visible);
 
-  // loading / error states
-  if (loading) {
-    return <p className="p-4">Cargando productos…</p>;
-  }
-  if (error) {
-    return <p className="p-4 text-red-600">{error}</p>;
-  }
+  if (loading) return <p className="p-4">Cargando productos…</p>;
+  if (error)   return <p className="p-4 text-red-600">{error}</p>;
+
+  // Handlers
+   const handleAdd = async (prod: Product, qty: number) => {
+    try {
+      await addItem(prod.id, qty);
+      setModal({
+        type: 'alert',
+        title: '¡Añadido!',
+        message: `Se ha añadido ${qty} × ${prod.name} al carrito.`,
+        onConfirm: () => setModal(null),
+        confirmText: 'OK'
+      });
+    } catch (e: any) {
+      setModal({
+        type: 'alert',
+        title: 'Error',
+        message: e.message,
+        onConfirm: () => setModal(null),
+        confirmText: 'OK'
+      });
+    }
+  };
+
+  const handleToggleVisible = (prod: Product) => {
+    setModal({
+      type: 'confirm',
+      title: prod.visible ? 'Ocultar producto' : 'Mostrar producto',
+      message: prod.visible
+        ? '¿Quieres ocultar este producto a los clientes?'
+        : '¿Quieres mostrar este producto a los clientes?',
+      onConfirm: async () => {
+        await updateProduct({ ...prod, visible: !prod.visible });
+        setModal(null);
+      },
+      onCancel: () => setModal(null),
+      confirmText: prod.visible ? 'Ocultar' : 'Mostrar',
+      cancelText: 'Cancelar'
+    });
+  };
+
+  const handleDelete = (id: string) => {
+    setModal({
+      type: 'confirm',
+      title: 'Eliminar producto',
+      message: '¿Estás seguro de que deseas eliminar este producto?',
+      onConfirm: async () => {
+        await deleteProduct(id);
+        setModal(null);
+      },
+      onCancel: () => setModal(null)
+    });
+  };
 
   return view === 'categories' ? (
     <div className="p-4 bg-gray-100 min-h-full text-center">
-      <h2 className="text-3xl font-semibold mb-6 text-gray-800">Menú de productos ☕</h2>
+      <h2 className="text-3xl font-semibold mb-6 text-gray-800">Menú☕</h2>
 
       {isEmployee && (
         <button
-          className="mb-6 px-4 py-2 bg-green-600 text-white rounded"
+          className="mb-6 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
           onClick={() => setShowCreate(true)}
         >
-          + Crear producto
+          Crear producto
         </button>
       )}
 
@@ -87,7 +139,7 @@ export default function ProductsPage() {
           <div
             key={c.key}
             className="cursor-pointer rounded overflow-hidden shadow"
-            onClick={() => handleSelectCategory(c.key)}
+            onClick={() => { setCategory(c.key); setView('products'); }}
           >
             <img src={c.img} alt={c.label} className="h-40 w-full object-cover" />
             <div className="p-4 bg-white">
@@ -152,12 +204,10 @@ export default function ProductsPage() {
             key={p.id}
             product={p}
             isEmployee={isEmployee}
-            onAdd={async (id, qty) => {
-              await API.post('/cart/add', { productId: id, quantity: qty });
-            }}
+            onAdd={(id, qty) => handleAdd(p, qty)}
             onEdit={isEmployee ? p => setModalProduct(p) : undefined}
-            onDelete={isEmployee ? id => setConfirmDelete(id) : undefined}
-            onToggleVisible={isEmployee ? (id, vis) => setConfirmToggle({ id, visible: vis }) : undefined}
+            onDelete={isEmployee ? () => handleDelete(p.id) : undefined}
+            onToggleVisible={isEmployee ? () => handleToggleVisible(p) : undefined}
           />
         ))}
       </div>
@@ -173,31 +223,14 @@ export default function ProductsPage() {
         />
       )}
 
-      {confirmToggle && (
+      {modal && (
         <ConfirmModal
-          title={confirmToggle.visible ? 'Mostrar producto' : 'Ocultar producto'}
-          message={
-            confirmToggle.visible
-              ? '¿Quieres mostrar este producto a los clientes?'
-              : '¿Quieres ocultar este producto a los clientes?'
-          }
-          onCancel={() => setConfirmToggle(null)}
-          onConfirm={async () => {
-            await updateProduct({ ...products.find(x => x.id === confirmToggle.id)!, visible: confirmToggle.visible });
-            setConfirmToggle(null);
-          }}
-        />
-      )}
-
-      {confirmDelete && (
-        <ConfirmModal
-          title="Eliminar producto"
-          message="¿Estás seguro de que deseas eliminar este producto?"
-          onCancel={() => setConfirmDelete(null)}
-          onConfirm={async () => {
-            await deleteProduct(confirmDelete);
-            setConfirmDelete(null);
-          }}
+          title={modal.title}
+          message={modal.message}
+          onConfirm={() => void modal.onConfirm()}
+          onCancel={modal.onCancel}
+          confirmText={modal.confirmText}
+          cancelText={modal.cancelText}
         />
       )}
     </div>

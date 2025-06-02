@@ -63,7 +63,7 @@ export function ProductCard({
           ))}
         </select>
         <button
-          className="bg-blue-500 text-white px-3 py-1 rounded ml-2"
+          className="px-3 py-1 ml-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
           onClick={() => onAdd(product.id, qty)}
         >
           Añadir

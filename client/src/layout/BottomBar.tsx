@@ -6,31 +6,50 @@ import { useAuth } from '../features/auth/hooks/useAuth';
 export default function BottomBar() {
   const { pathname } = useLocation();
   const { user } = useAuth();
+  const role = user?.role;
 
-  const items = [
-    { to: '/', icon: '🏠' },
-    { to: '/products', icon: '☕️' },
-    { to: '/cart', icon: '🛒' },
-    // Pedidos solo para empleados y superadmin
-    ...(user && ['Employee', 'SuperAdmin'].includes(user.role)
-      ? [{ to: '/orders', icon: '🚩' }]
-      : []),
-    { to: '/settings', icon: '⚙️' }
+  const baseItems = [
+    { to: '/',         icon: '🏠', label: 'Inicio' },
+    { to: '/products', icon: '☕️', label: 'Menú' },
+    { to: '/cart',     icon: '🛒', label: 'Cesta' },
+    { to: '/history',  icon: '📆', label: 'Historial' },
   ];
+
+  const ordersItem = { to: '/orders', icon: '📌', label: 'Pedidos' };
+  const settingsItem = { to: '/settings', icon: '⚙️', label: 'Ajustes' };
+
+  const items = [...baseItems];
+  if (role === 'Employee' || role === 'SuperAdmin') {
+    items.push(ordersItem);
+  }
+  items.push(settingsItem);
 
   return (
     <nav className="flex justify-around p-2 bg-white shadow">
-      {items.map((it) => (
-        <Link
-          key={it.to}
-          to={it.to}
-          className={
-            'text-2xl ' + (pathname === it.to ? 'text-blue-500' : 'text-gray-400')
-          }
-        >
-          {it.icon}
-        </Link>
-      ))}
+      {items.map((it) => {
+        const isActive = pathname === it.to;
+        return (
+          <Link
+            key={it.to}
+            to={it.to}
+            className={`
+              flex items-center justify-center
+              text-2xl
+              ${isActive ? 'text-blue-500' : 'text-gray-400'}
+              md:px-3 md:py-1 md:rounded
+              ${isActive 
+                ? 'md:border md:border-black md:bg-gray-100'
+                : 'md:border md:border-transparent md:bg-transparent'
+              }
+            `}
+          >
+            <span>{it.icon}</span>
+            <span className="hidden md:inline ml-2 text-black text-lg">
+              {it.label}
+            </span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }

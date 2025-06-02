@@ -4,16 +4,43 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.SqlServer;
 using server.Features.Auth.Services;
+using server.Features.Cart.Services;
+using server.Features.Products.Services;
 using server.Infrastructure.Configuration;
 using server.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) EF Core: SQL Server para datos de aplicación
+// ────────────────────────────────────────────────────────────────────────────────
+// 1) Habilitar HTTPS Redirection
+//    (Necesitas tener un certificado de desarrollo; Visual Studio / dotnet genera uno automáticamente)
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+    options.HttpsPort = 5001; // El puerto HTTPS que usa tu launchSettings.json (normalmente 5001)
+});
+
+// ────────────────────────────────────────────────────────────────────────────────
+// 2) CORS: permitir credenciales desde el frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendWithCredentials", policy =>
+    {
+        policy
+            .WithOrigins("https://localhost:5173")  // Ahora el front debe servirse en HTTPS también
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────
+// 3) EF Core: SQL Server para datos de aplicación
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2) Distributed SQL Server Cache para sesiones
+// ────────────────────────────────────────────────────────────────────────────────
+// 4) Distributed SQL Server Cache para sesiones (SessionCache table)
 builder.Services.AddDistributedSqlServerCache(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -21,16 +48,19 @@ builder.Services.AddDistributedSqlServerCache(options =>
     options.TableName       = "SessionCache";
 });
 
-// 3) Session Middleware
+// ────────────────────────────────────────────────────────────────────────────────
+// 5) Session Middleware (30 min timeout)
 builder.Services.AddSession(opts =>
 {
     opts.Cookie.Name     = "PickAndGo.Session";
-    opts.IdleTimeout     = TimeSpan.FromHours(1);
+    opts.IdleTimeout     = TimeSpan.FromMinutes(30);
     opts.Cookie.HttpOnly = true;
-    opts.Cookie.SameSite = SameSiteMode.Lax;
+    opts.Cookie.SameSite = SameSiteMode.None;     // Debe ser None para cross-site
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Forzar Secure
 });
 
-// 4) Cookie Authentication
+// ────────────────────────────────────────────────────────────────────────────────
+// 6) Cookie Authentication (30 min, sin sliding)
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -38,13 +68,17 @@ builder.Services
         options.Cookie.Name        = "PickAndGo.Auth";
         options.LoginPath          = "/auth/login";
         options.LogoutPath         = "/auth/logout";
-        options.ExpireTimeSpan     = TimeSpan.FromHours(1);
-        options.SlidingExpiration  = true;
+        options.ExpireTimeSpan     = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration  = false;
         options.Cookie.HttpOnly    = true;
-        options.Cookie.SameSite    = SameSiteMode.Lax;
+
+        // <<< Esto es lo importante: SameSite=None + Secure >>>
+        options.Cookie.SameSite    = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
-// 5) Hangfire para jobs en background
+// ────────────────────────────────────────────────────────────────────────────────
+// 7) Hangfire en background
 builder.Services.AddHangfire(cfg => cfg
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
@@ -55,43 +89,50 @@ builder.Services.AddHangfire(cfg => cfg
 );
 builder.Services.AddHangfireServer();
 
-// 6) SMTP y servicios de aplicación
+// ────────────────────────────────────────────────────────────────────────────────
+// 8) SMTP, AuthService, etc.
 builder.Services.Configure<SmtpSettings>(
     builder.Configuration.GetSection("SmtpSettings")
 );
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<AuthService>();
 
-// 7) Swagger / OpenAPI
+// ────────────────────────────────────────────────────────────────────────────────
+// 9) Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 8) Registrar ProductService y controladores
-builder.Services.AddScoped<server.Features.Products.Services.ProductService>();
+// ────────────────────────────────────────────────────────────────────────────────
+// 10) Servicios de dominio
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<CartService>();
+
+// ────────────────────────────────────────────────────────────────────────────────
+// 11) Controladores Web API
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// 9) Forzar URL de la API
+// ────────────────────────────────────────────────────────────────────────────────
+// 12) Forzar URLs (HTTP y HTTPS)
 app.Urls.Clear();
 app.Urls.Add("http://localhost:5000");
+app.Urls.Add("https://localhost:5001");
 
-// ── Pipeline de middleware ordenado ────────────────────────────────────────────
-
-// 10) Routing: determina el endpoint antes de auth
+// ────────────────────────────────────────────────────────────────────────────────
+// 13) Pipeline de middleware
+app.UseHttpsRedirection();                              // Redirigir HTTP→HTTPS
 app.UseRouting();
 
-// 11) Session
-app.UseSession();
+app.UseCors("AllowFrontendWithCredentials");             // Debe ir antes de Auth
 
-// 12) Authentication y Authorization
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 13) Dashboard de Hangfire
+// Dashboard de Hangfire en /hangfire
 app.UseHangfireDashboard("/hangfire");
 
-// 14) Swagger UI en desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -102,8 +143,16 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// 15) Mapear controladores (equiv. UseEndpoints)
 app.MapControllers();
 
-// 16) Arrancar la aplicación
+// ────────────────────────────────────────────────────────────────────────────────
+// 14) Job periódico
+RecurringJob.AddOrUpdate<CartService>(
+    "CleanupCartItems",
+    svc => svc.CleanupExpiredCartItems(),
+    "*/10 * * * *"   // cada 10 minutos
+);
+
+// ────────────────────────────────────────────────────────────────────────────────
+// 15) Arrancar aplicación
 app.Run();
