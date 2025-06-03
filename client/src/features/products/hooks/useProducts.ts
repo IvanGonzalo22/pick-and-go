@@ -1,3 +1,4 @@
+// src/features/products/hooks/useProducts.tsx
 import { useState, useEffect } from 'react';
 import { API } from '../../../common/utils/api';
 import type { Product as ProductType } from '../components/ProductCard';

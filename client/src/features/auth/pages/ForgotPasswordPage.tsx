@@ -1,4 +1,4 @@
-// src/features/auth/pages/ResetPasswordPage.tsx
+// src/features/auth/pages/ForgotPasswordPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { API } from '../../../common/utils/api';

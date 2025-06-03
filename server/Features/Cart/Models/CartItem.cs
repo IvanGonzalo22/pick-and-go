@@ -1,3 +1,4 @@
+// server/Features/Cart/Models/CartItem.cs
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

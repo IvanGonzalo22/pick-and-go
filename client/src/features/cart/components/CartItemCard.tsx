@@ -1,3 +1,4 @@
+// src/features/cart/components/CartItemCard.tsx
 import React, { useState } from 'react';
 import type { CartItem } from '../hooks/useCart';
 

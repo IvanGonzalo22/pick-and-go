@@ -43,12 +43,16 @@ export function ProductCard({
         />
         {!product.visible && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-6xl text-red-500 select-none">✖️</span>
+            <span className="text-8xl text-red-500 select-none">🚫</span>
           </div>
         )}
       </div>
 
       <h3 className="font-semibold">{product.name}</h3>
+      {/* Mostrar comentario si existe */}
+      {product.comment && (
+        <p className="text-sm text-gray-700 mb-1">⚠️ {product.comment}</p>
+      )}
       <p className="text-gray-600">{product.price.toFixed(2)} €</p>
       <p className="text-sm text-gray-500">Stock: {product.stock}</p>
 
@@ -70,24 +74,29 @@ export function ProductCard({
         </button>
         {isEmployee && (
           <div className="ml-auto flex items-center space-x-2">
+            {/* Toggle visible/hidden: muestra 🚫 si está visible, ✅ si está oculto */}
             <button
-              className="bg-gray-400 text-white px-3 py-1 rounded"
+              className={`px-3 py-1 rounded text-white transition-colors duration-200 ${
+                product.visible
+                  ? 'bg-gray-400 hover:bg-gray-500'
+                  : 'bg-green-500 hover:bg-green-600'
+              }`}
               onClick={() =>
                 onToggleVisible
                   ? onToggleVisible(product.id, !product.visible)
                   : undefined
               }
             >
-              🚫
+              {product.visible ? '🚫' : '✅'}
             </button>
             <button
-              className="bg-yellow-400 text-white px-3 py-1 rounded"
+              className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition-colors duration-200"
               onClick={() => onEdit && onEdit(product)}
             >
               ✏️
             </button>
             <button
-              className="bg-red-500 text-white px-3 py-1 rounded"
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors duration-200"
               onClick={() => onDelete && onDelete(product.id)}
             >
               ❌
@@ -96,5 +105,5 @@ export function ProductCard({
         )}
       </div>
     </div>
-);
+  );
 }

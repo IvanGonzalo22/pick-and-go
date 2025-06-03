@@ -1,3 +1,4 @@
+// server/Features/Products/DTOs/ProductDto.cs
 using System;
 
 namespace server.Features.Products.DTOs

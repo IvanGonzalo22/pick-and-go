@@ -1,3 +1,4 @@
+// server/Features/Products/Controllers/ProductController.cs
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
