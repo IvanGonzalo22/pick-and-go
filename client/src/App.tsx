@@ -11,7 +11,7 @@ import ProductsPage from './features/products/pages/ProductsPage';
 import CartPage from './features/cart/pages/CartPage';
 import OrdersPage from './features/orders/pages/OrdersPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
-import HistoryPage from './features/history/pages/HistoryPage'; // Import añadido
+import HistoryPage from './features/history/pages/HistoryPage';
 import SuccessPage from './features/payments/pages/SuccessPage';
 import AppLayout from './layout/AppLayout';
 import { useAuth } from './features/auth/hooks/useAuth';
