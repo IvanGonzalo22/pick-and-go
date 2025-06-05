@@ -1,6 +1,7 @@
+// src/common/utils/api.ts
 import axios from 'axios';
 
 export const API = axios.create({
-  baseURL: '/', // Todo proxied a http://localhost:5000
-  withCredentials: true // Envía y recibe cookies automáticamente
+  baseURL: 'https://localhost:5001',
+  withCredentials: true,
 });

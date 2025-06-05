@@ -114,8 +114,19 @@ export default function ProductsPage() {
       title: 'Eliminar producto',
       message: '¿Estás seguro de que deseas eliminar este producto?',
       onConfirm: async () => {
-        await deleteProduct(id);
-        setModal(null);
+        try {
+          await deleteProduct(id);
+          setModal(null);
+        } catch (e: any) {
+          // e.message contendrá "No se puede eliminar: el producto está en uso."
+          setModal({
+            type: 'alert',
+            title: 'Error al eliminar',
+            message: e.message,
+            onConfirm: () => setModal(null),
+            confirmText: 'OK'
+          });
+        }
       },
       onCancel: () => setModal(null)
     });

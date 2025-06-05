@@ -6,18 +6,20 @@ using Microsoft.Extensions.Caching.SqlServer;
 using server.Features.Auth.Services;
 using server.Features.Cart.Services;
 using server.Features.Products.Services;
+using server.Features.Orders.Services;
+using server.Features.Payments.Services;
 using server.Infrastructure.Configuration;
 using server.Infrastructure.Persistence;
+// ↑ NO hay 'using Stripe;' aquí
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ────────────────────────────────────────────────────────────────────────────────
 // 1) Habilitar HTTPS Redirection
-//    (Necesitas tener un certificado de desarrollo; Visual Studio / dotnet genera uno automáticamente)
 builder.Services.AddHttpsRedirection(options =>
 {
     options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-    options.HttpsPort = 5001; // El puerto HTTPS que usa tu launchSettings.json (normalmente 5001)
+    options.HttpsPort = 5001;
 });
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -27,7 +29,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontendWithCredentials", policy =>
     {
         policy
-            .WithOrigins("https://localhost:5173")  // Ahora el front debe servirse en HTTPS también
+            .WithOrigins("https://localhost:5173")
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -55,8 +57,8 @@ builder.Services.AddSession(opts =>
     opts.Cookie.Name     = "PickAndGo.Session";
     opts.IdleTimeout     = TimeSpan.FromMinutes(30);
     opts.Cookie.HttpOnly = true;
-    opts.Cookie.SameSite = SameSiteMode.None;     // Debe ser None para cross-site
-    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Forzar Secure
+    opts.Cookie.SameSite = SameSiteMode.None;     
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -104,33 +106,38 @@ builder.Services.AddSwaggerGen();
 
 // ────────────────────────────────────────────────────────────────────────────────
 // 10) Servicios de dominio
-builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<server.Features.Products.Services.ProductService>(); // tu ProductService
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<PaymentService>();
 
 // ────────────────────────────────────────────────────────────────────────────────
 // 11) Controladores Web API
 builder.Services.AddControllers();
 
+// ────────────────────────────────────────────────────────────────────────────────
+// 12) Inicializar Stripe con la SecretKey (sin 'using Stripe;')
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 var app = builder.Build();
 
 // ────────────────────────────────────────────────────────────────────────────────
-// 12) Forzar URLs (HTTP y HTTPS)
+// 13) Forzar URLs (HTTP y HTTPS)
 app.Urls.Clear();
 app.Urls.Add("http://localhost:5000");
 app.Urls.Add("https://localhost:5001");
 
 // ────────────────────────────────────────────────────────────────────────────────
-// 13) Pipeline de middleware
-app.UseHttpsRedirection();                              // Redirigir HTTP→HTTPS
+// 14) Pipeline de middleware
+app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseCors("AllowFrontendWithCredentials");             // Debe ir antes de Auth
+app.UseCors("AllowFrontendWithCredentials");
 
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Dashboard de Hangfire en /hangfire
 app.UseHangfireDashboard("/hangfire");
 
 if (app.Environment.IsDevelopment())
@@ -146,13 +153,13 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 // ────────────────────────────────────────────────────────────────────────────────
-// 14) Job periódico
+// 15) Job periódico
 RecurringJob.AddOrUpdate<CartService>(
     "CleanupCartItems",
     svc => svc.CleanupExpiredCartItems(),
-    "*/10 * * * *"   // cada 10 minutos
+    "*/10 * * * *"
 );
 
 // ────────────────────────────────────────────────────────────────────────────────
-// 15) Arrancar aplicación
+// 16) Arrancar aplicación
 app.Run();

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { API } from '../../../common/utils/api';
 import type { Product as ProductType } from '../components/ProductCard';
 
-// Reexportamos el tipo Product para que esté disponible desde el hook
 export type Product = ProductType;
 
 export function useProducts() {
@@ -19,7 +18,7 @@ export function useProducts() {
         setProducts(res.data);
         setError(null);
       } catch (e: any) {
-        setError(e.response?.data?.Error || 'Error al cargar productos');
+        setError(e.response?.data?.error || 'Error al cargar productos');
       } finally {
         setLoading(false);
       }
@@ -52,6 +51,10 @@ export function useProducts() {
     try {
       await API.delete(`/products/${id}`);
       setProducts(ps => ps.filter(p => p.id !== id));
+    } catch (e: any) {
+      // Leemos e.response.data.error (minúscula)
+      const msg = e.response?.data?.error || 'Error al eliminar producto';
+      throw new Error(msg);
     } finally {
       setLoading(false);
     }

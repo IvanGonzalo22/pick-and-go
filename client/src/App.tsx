@@ -12,12 +12,22 @@ import CartPage from './features/cart/pages/CartPage';
 import OrdersPage from './features/orders/pages/OrdersPage';
 import SettingsPage from './features/settings/pages/SettingsPage';
 import HistoryPage from './features/history/pages/HistoryPage'; // Import añadido
+import SuccessPage from './features/payments/pages/SuccessPage';
 import AppLayout from './layout/AppLayout';
 import { useAuth } from './features/auth/hooks/useAuth';
 
 // Ruta que comprueba autenticación:
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg">Cargando…</p>
+      </div>
+    );
+  }
+
   return user ? children : <Navigate to="/login" replace />;
 };
 
@@ -45,6 +55,16 @@ export default function App() {
       {/* RUTAS DE RESETEO DE CONTRASEÑA */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      {/* PÁGINA DE ÉXITO (expuesta fuera de AppLayout, pero protegida) */}
+      <Route
+        path="/success"
+        element={
+          <ProtectedRoute>
+            <SuccessPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* RUTAS PRIVADAS BAJO AppLayout */}
       <Route

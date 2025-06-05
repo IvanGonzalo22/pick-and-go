@@ -51,7 +51,7 @@ export function ProductCard({
       <h3 className="font-semibold">{product.name}</h3>
       {/* Mostrar comentario si existe */}
       {product.comment && (
-        <p className="text-sm text-gray-700 mb-1">⚠️ {product.comment}</p>
+        <p className="text-sm text-gray-700 mb-1">{product.comment}</p>
       )}
       <p className="text-gray-600">{product.price.toFixed(2)} €</p>
       <p className="text-sm text-gray-500">Stock: {product.stock}</p>

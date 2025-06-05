@@ -1,8 +1,9 @@
 // src/features/cart/pages/CartPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import { CartItemCard } from '../components/CartItemCard';
 import { ConfirmModal } from '../../../common/components/ConfirmModal';
+import { API } from '../../../common/utils/api';
 
 export default function CartPage() {
   const {
@@ -46,13 +47,24 @@ export default function CartPage() {
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200"
             onClick={async () => {
               try {
+                // 1) Validar stock en backend
                 await validateCart();
-                // abrir Stripe...
+
+                // 2) Redondear total a dos decimales para evitar problemas de precisión
+                const fixedTotal = parseFloat(total.toFixed(2));
+
+                // 3) Crear CheckoutSession en el backend con fixedTotal
+                const res = await API.post<{ url: string }>('/payments/create-checkout-session', {
+                  total: fixedTotal
+                });
+
+                // 4) Redirigir a Stripe
+                window.location.href = res.data.url;
               } catch (e: any) {
                 setModal({
                   type: 'alert',
-                  title: 'Stock insuficiente',
-                  message: e.message,
+                  title: 'Stock insuficiente o error',
+                  message: e.message || 'No se pudo iniciar el pago.',
                   onConfirm: async () => {
                     await fetchCart();
                     setModal(null);

@@ -1,9 +1,10 @@
-// server/Features/Products/Controllers/ProductController.cs
+// server/Features/Products/Controllers/ProductsController.cs
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;  // <-- Añadir
 using server.Features.Products.DTOs;
 using server.Features.Products.Services;
 
@@ -50,8 +51,16 @@ namespace server.Features.Products.Controllers
         [HttpDelete("{id:guid}"), Authorize(Roles="Employee,SuperAdmin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var ok = await _svc.DeleteAsync(id);
-            return ok ? NoContent() : NotFound();
+            try
+            {
+                var ok = await _svc.DeleteAsync(id);
+                return ok ? NoContent() : NotFound();
+            }
+            catch (DbUpdateException)
+            {
+                // Si el producto está referenciado (en carrito, etc.) EF lanza DbUpdateException.
+                return BadRequest(new { Error = "No se puede eliminar: el producto está en uso." });
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Features.Cart.Models;
 using server.Features.Auth.Models;
 using server.Features.Products.Models;
+using server.Features.Orders.Models;
 
 namespace server.Infrastructure.Persistence
 {
@@ -17,6 +18,9 @@ namespace server.Infrastructure.Persistence
         // Antes: public DbSet<server.Features.Cart.Models.CartItem> CartItems { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+
         // ... otros DbSet ...
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
