@@ -58,7 +58,7 @@ export default function HistoryPage() {
   return (
     <div className="p-4 bg-gray-100 min-h-full">
       <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">
-        Historial de pedidos
+        Historial de pedidos 📆
       </h2>
 
       {loading && <p className="text-center">Cargando historial…</p>}

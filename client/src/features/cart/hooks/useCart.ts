@@ -74,7 +74,6 @@ export function useCart() {
     setLoading(true);
     try {
       await API.put('/cart/update', { productId, quantity });
-      // reflejamos localmente si quieres o simplemente refetchCart
       await fetchCart();
     } catch (err: any) {
       throw new Error(err.response?.data?.Error || 'Error al actualizar cantidad');

@@ -55,7 +55,6 @@ namespace server.Features.Auth.Services
                 PasswordHash = hash,
                 Role         = role,
                 CreatedAt    = DateTime.UtcNow,
-                // PasswordLastChanged se deja NULL para nuevos usuarios
             };
 
             _context.Users.Add(user);

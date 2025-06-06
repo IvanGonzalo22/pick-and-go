@@ -25,7 +25,7 @@ export default function BottomBar() {
   items.push(settingsItem);
 
   return (
-    <nav className="flex justify-around p-2 bg-white shadow">
+    <nav className="flex justify-around p-2 bg-fondo-principal shadow">
       {items.map((it) => {
         const isActive = pathname === it.to;
         return (

@@ -1,23 +1,24 @@
 // src/features/orders/hooks/useOrders.tsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { API } from '../../../common/utils/api';
 
-export type OrderStatus = 'pending' | 'ready' | 'collected';
-
+// Cada línea de producto en un pedido:
 export interface OrderItem {
   productId: string;
   productName: string;
   quantity: number;
   unitPrice: number;
+  subtotal: number;
 }
 
+// Estructura de cada pedido (para empleados) con las líneas incluidas:
 export interface Order {
   orderId: string;
   shortCode: string;
   customerName: string;
   customerEmail: string;
   total: number;
-  status: OrderStatus;
+  status: 'pending' | 'ready' | 'collected';
   createdAt: string;
   pendingAt: string;
   readyAt: string | null;
@@ -31,25 +32,24 @@ export function useOrders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1) Fetch general de todas las órdenes
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = async () => {
     setLoading(true);
     try {
       const res = await API.get<Order[]>('/orders');
       setOrders(res.data);
       setError(null);
     } catch (e: any) {
-      setError(e.response?.data?.error || 'Error al cargar órdenes');
+      setError(e.response?.data?.error || 'Error al cargar pedidos');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, []);
 
-  // 2) Mover una orden a “ready”
+  // 1) Mover una orden a “ready”
   const markReady = async (orderId: string) => {
     try {
       await API.put(`/orders/${orderId}/ready`);
@@ -59,7 +59,7 @@ export function useOrders() {
     }
   };
 
-  // 3) Mover una orden a “collected”
+  // 2) Mover una orden a “collected”
   const markCollected = async (orderId: string) => {
     try {
       await API.put(`/orders/${orderId}/collected`);
@@ -75,6 +75,7 @@ export function useOrders() {
     error,
     fetchOrders,
     markReady,
-    markCollected
+    markCollected,
   };
 }
+

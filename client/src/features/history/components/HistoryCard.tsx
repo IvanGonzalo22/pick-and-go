@@ -20,8 +20,8 @@ export function HistoryCard({ order, onRepeat }: HistoryCardProps) {
   // Color/emoji según estado
   const statusInfo = {
     pending: { label: 'PENDIENTE', emoji: '⚠️', color: 'text-orange-600' },
-    ready:   { label: 'LISTO',     emoji: '✅', color: 'text-blue-600' },
-    collected: { label: 'RECOGIDO', emoji: '🎉', color: 'text-green-600' }
+    ready:   { label: 'LISTO',     emoji: '✅', color: 'text-green-600' },
+    collected: { label: 'RECOGIDO', emoji: '☑️', color: 'text-blue-600' }
   } as const;
 
   const info = statusInfo[order.status];
@@ -50,11 +50,11 @@ export function HistoryCard({ order, onRepeat }: HistoryCardProps) {
           onClick={() => setExpanded(e => !e)}
           className="text-sm text-blue-500 hover:underline"
         >
-          {expanded ? 'Ocultar detalles ▲' : 'Ver detalles ▼'}
+          {expanded ? 'Ocultar productos ▲' : 'Ver productos ▼'}
         </button>
         <button
           onClick={() => onRepeat(order)}
-          className="text-sm text-green-600 hover:underline"
+          className="ml-2 px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
         >
           Repetir pedido
         </button>

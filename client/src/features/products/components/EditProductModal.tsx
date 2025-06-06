@@ -23,6 +23,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
   const [category, setCategory] = useState(product.category);
   const [subcats, setSubcats] = useState<string[]>([]);
   const [subcategory, setSubcategory] = useState(product.subcategory);
+  const [visible, setVisible] = useState(product.visible);
 
   useEffect(() => {
     const opt = CATEGORY_OPTIONS.find(o => o.value === category)!;
@@ -32,10 +33,25 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
     }
   }, [category]);
 
+  const handleSave = () => {
+    onSave({
+      ...product,
+      name,
+      price,
+      stock,
+      imageUrl,
+      comment,
+      category,
+      subcategory,
+      visible,
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded shadow p-6 w-full max-w-md">
+      <div className="bg-white rounded shadow p-6 w-full max-w-md overflow-auto">
         <h2 className="text-xl font-semibold mb-4">Editar producto</h2>
+
         {/* Campos básicos */}
         <label className="block mb-2">
           Nombre
@@ -45,6 +61,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setName(e.target.value)}
           />
         </label>
+
         <label className="block mb-2">
           Precio
           <input
@@ -54,6 +71,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setPrice(Number(e.target.value))}
           />
         </label>
+
         <label className="block mb-2">
           Stock
           <input
@@ -63,14 +81,33 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setStock(Number(e.target.value))}
           />
         </label>
+
         <label className="block mb-2">
           URL imagen
           <input
             className="w-full border rounded px-2 py-1"
             value={imageUrl}
             onChange={e => setImageUrl(e.target.value)}
+            placeholder="https://ejemplo.com/mi-foto.jpg"
           />
         </label>
+
+        {/* Vista previa de la imagen (solo si imageUrl no está vacío) */}
+        {imageUrl && (
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-1">Vista previa:</p>
+            <div className="w-full h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+              <img
+                src={imageUrl}
+                alt="Vista previa"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '';
+                }}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Ahora categoría y subcategoría */}
         <label className="block mb-2">
@@ -85,6 +122,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             ))}
           </select>
         </label>
+
         <label className="block mb-2">
           Subcategoría
           <select
@@ -100,7 +138,7 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
           </select>
         </label>
 
-        <label className="block mb-4">
+        <label className="block mb-2">
           Comentarios
           <textarea
             className="w-full border rounded px-2 py-1"
@@ -109,15 +147,23 @@ export function EditProductModal({ product, onSave, onCancel }: EditProductModal
             onChange={e => setComment(e.target.value)}
           />
         </label>
+
+        <label className="flex items-center mb-4 space-x-2">
+          <input
+            type="checkbox"
+            checked={visible}
+            onChange={e => setVisible(e.target.checked)}
+          />
+          <span>Visible para clientes</span>
+        </label>
+
         <div className="flex justify-end space-x-2">
           <button className="px-4 py-2 bg-gray-300 rounded" onClick={onCancel}>
             Cancelar
           </button>
           <button
             className="px-4 py-2 bg-green-500 text-white rounded"
-            onClick={() =>
-              onSave({ ...product, name, price, stock, imageUrl, comment, category, subcategory })
-            }
+            onClick={handleSave}
           >
             Aceptar
           </button>

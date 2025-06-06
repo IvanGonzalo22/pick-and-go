@@ -8,6 +8,9 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Tuffy', 'sans-serif'],
+      },
+      colors: {
+        'fondo-principal': '#F8CBAD',
       }
     }
   },

@@ -33,7 +33,7 @@ export default function CartPage() {
     <div className="p-4 bg-gray-100 min-h-full flex flex-col items-center">
       {/* Título centrado */}
       <h2 className="text-3xl font-semibold mb-4 text-gray-800 text-center">
-        Carrito
+        Carrito 🛒
       </h2>
 
       {items.length > 0 && (

@@ -28,7 +28,7 @@ namespace server.Features.Auth.Models
 
         public DateTime CreatedAt { get; set; }
 
-        // --- Nuevas columnas para reseteo de contraseña ---
+        // --- Reseteo de contraseña ---
         public Guid?   PasswordResetCode    { get; set; }
         public DateTime? PasswordResetExpires{ get; set; }
 

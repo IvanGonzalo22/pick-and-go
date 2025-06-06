@@ -30,7 +30,7 @@ export default function OrdersPage() {
   return (
     <div className="p-4 bg-gray-100 min-h-full">
       <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">
-        Gestión de Pedidos
+        Gestión de Pedidos 📌
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

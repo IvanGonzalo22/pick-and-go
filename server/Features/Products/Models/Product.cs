@@ -14,7 +14,7 @@ namespace server.Features.Products.Models
         public string Name { get; set; } = string.Empty;
 
         [Required, DataType(DataType.Currency)]
-        [Column(TypeName = "decimal(18,2)")]       // <-- Precisión y escala explícitas
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
         [Required]

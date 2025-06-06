@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;  // <-- Añadir
+using Microsoft.EntityFrameworkCore;
 using server.Features.Products.DTOs;
 using server.Features.Products.Services;
 

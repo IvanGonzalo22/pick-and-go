@@ -10,9 +10,9 @@ import { ConfirmModal } from '../../../common/components/ConfirmModal';
 import { useCart } from '../../cart/hooks/useCart';
 
 const CATEGORIES = [
-  { key: 'bocatas-sandwiches', label: 'Bocatas y sándwiches', img: '/imgs/bocata.jpg' },
-  { key: 'cafes-bebidas',      label: 'Cafés y bebidas',      img: '/imgs/cafe.jpg' },
-  { key: 'dulces-bolleria',    label: 'Dulces y bollería',    img: '/imgs/dulce.jpg' },
+  { key: 'bocatas-sandwiches', label: 'Bocatas y sándwiches', img: '/imgs/bocatas-sandwiches.png' },
+  { key: 'cafes-bebidas',      label: 'Cafés y bebidas',      img: '/imgs/cafes-bebidas.png' },
+  { key: 'dulces-bolleria',    label: 'Dulces y bollería',    img: '/imgs/dulces-bolleria.png'},
 ];
 
 const SUBCATS: Record<string,string[]> = {
@@ -134,11 +134,11 @@ export default function ProductsPage() {
 
   return view === 'categories' ? (
     <div className="p-4 bg-gray-100 min-h-full text-center">
-      <h2 className="text-3xl font-semibold mb-6 text-gray-800">Menú☕</h2>
+      <h2 className="text-3xl font-semibold mb-6 text-gray-800">Menú ☕</h2>
 
       {isEmployee && (
         <button
-          className="mb-6 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
+          className="mb-6 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors duration-200"
           onClick={() => setShowCreate(true)}
         >
           Crear producto

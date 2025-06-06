@@ -40,14 +40,14 @@ export function CreateProductModal({ onCreate, onCancel }: CreateProductModalPro
       comment,
       category,
       subcategory,
-      visible,             // <-- siempre true a menos que el empleado lo cambie
+      visible,
     };
     onCreate(newProd);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded shadow p-6 w-full max-w-md">
+      <div className="bg-white rounded shadow p-6 w-full max-w-md overflow-auto">
         <h2 className="text-xl font-semibold mb-4">Crear producto</h2>
 
         <label className="block mb-2">
@@ -85,8 +85,27 @@ export function CreateProductModal({ onCreate, onCancel }: CreateProductModalPro
             className="w-full border rounded px-2 py-1"
             value={imageUrl}
             onChange={e => setImageUrl(e.target.value)}
+            placeholder="https://ejemplo.com/mi-foto.jpg"
           />
         </label>
+
+        {/* Vista previa de la imagen (se muestra solo si imageUrl no está vacío) */}
+        {imageUrl && (
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-1">Vista previa:</p>
+            <div className="w-full h-40 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+              <img
+                src={imageUrl}
+                alt="Vista previa"
+                onError={(e) => {
+                  /* Si la URL no carga, mostrar un recuadro vacío */
+                  (e.target as HTMLImageElement).src = '';
+                }}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+          </div>
+        )}
 
         <label className="block mb-2">
           Categoría

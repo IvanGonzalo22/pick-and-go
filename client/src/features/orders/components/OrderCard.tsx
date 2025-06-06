@@ -1,6 +1,6 @@
 // src/features/orders/components/OrderCard.tsx
-import React, { useEffect, useState } from 'react';
-import type { Order, OrderStatus } from '../hooks/useOrders';
+import React, { useState, useEffect } from 'react';
+import type { Order, OrderItem } from '../hooks/useOrders';
 
 interface OrderCardProps {
   order: Order;
@@ -9,139 +9,173 @@ interface OrderCardProps {
 }
 
 export function OrderCard({ order, onMarkReady, onMarkCollected }: OrderCardProps) {
-  // Ticks para forzar re-render cada minuto
-  const [, setTick] = useState(0);
+  const [collapsed, setCollapsed] = useState(false);
+  const [timerPending, setTimerPending] = useState<string>('');
+  const [timerReady, setTimerReady] = useState<string>('');
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 60_000); // cada minuto
-    return () => clearInterval(interval);
-  }, []);
-
-  // Formatear “DD/MM/YYYY HH:mm”
-  const formatDateTime = (iso: string) => {
+  // Formatea una fecha ISO a “DD/MM/YYYY HH:mm”
+  const formatDate = (iso: string) => {
     const d = new Date(iso);
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
-  // Calcular intervalo en horas y minutos entre dos ISO strings
-  const getDuration = (fromIso: string, toIso: string) => {
+  // Calcula diferencia entre ahora y un timestamp, en “Hh Mmin”
+  const computeElapsed = (fromIso: string) => {
     const from = new Date(fromIso).getTime();
-    const to = new Date(toIso).getTime();
-    const diffMs = to - from;
+    const diffMs = Date.now() - from;
+    if (diffMs < 0) return '0h 0m';
     const totalMinutes = Math.floor(diffMs / 60000);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${pad(hours)}h ${pad(minutes)}m`;
+    return `${hours}h ${minutes}m`;
   };
 
-  // Devuelve texto de timer para pending / ready según estado
-  let pendingDuration = '';
-  let readyDuration = '';
-  const nowIso = new Date().toISOString();
+  // Actualiza temporizadores mientras el pedido está en “pending” o “ready”
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (order.status === 'pending') {
+      // Solo mostrará el timerPending en tiempo real
+      interval = setInterval(() => {
+        setTimerPending(computeElapsed(order.pendingAt));
+      }, 60_000);
+      // Calcular inmediatamente
+      setTimerPending(computeElapsed(order.pendingAt));
+      // Ready timer queda vacío
+      setTimerReady('');
+    } else if (order.status === 'ready') {
+      // Pending queda congelado en la última lectura
+      setTimerPending(computeElapsed(order.pendingAt));
+      // Ready se va actualizando
+      interval = setInterval(() => {
+        if (order.readyAt) {
+          setTimerReady(computeElapsed(order.readyAt));
+        }
+      }, 60_000);
+      if (order.readyAt) {
+        setTimerReady(computeElapsed(order.readyAt));
+      }
+    } else {
+      // Collected: ambos congelados
+      setTimerPending(computeElapsed(order.pendingAt));
+      if (order.readyAt) {
+        setTimerReady(computeElapsed(order.readyAt));
+      }
+    }
 
-  if (order.status === 'pending') {
-    pendingDuration = getDuration(order.pendingAt, nowIso);
-  } else if (order.status === 'ready') {
-    // pendingAt ya está congelado (usamos readyAt si existe)
-    if (order.readyAt) {
-      pendingDuration = getDuration(order.pendingAt, order.readyAt);
-      readyDuration = getDuration(order.readyAt, nowIso);
-    } else {
-      pendingDuration = getDuration(order.pendingAt, nowIso);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [order]);
+
+  // Color/emoji según estado
+  const statusInfo = {
+    pending:   { label: 'PENDIENTE',  emoji: '⚠️', color: 'text-orange-600' },
+    ready:     { label: 'LISTO',      emoji: '✅', color: 'text-green-600'   },
+    collected: { label: 'RECOGIDO',   emoji: '☑️', color: 'text-blue-600'  },
+  } as const;
+  const info = statusInfo[order.status];
+
+  // Handler del botón de estado:
+  const handleStateChange = async () => {
+    if (order.status === 'pending') {
+      await onMarkReady(order.orderId);
+    } else if (order.status === 'ready') {
+      await onMarkCollected(order.orderId);
     }
-  } else if (order.status === 'collected') {
-    if (order.readyAt && order.collectedAt) {
-      pendingDuration = getDuration(order.pendingAt, order.readyAt);
-      readyDuration = getDuration(order.readyAt, order.collectedAt);
-    } else {
-      // fallback si no hay readyAt
-      pendingDuration = getDuration(order.pendingAt, order.collectedAt || nowIso);
-    }
-  }
+    // Si está “collected”, no hay botón adicional
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 flex flex-col">
-      {/* Cabecera: Código, Cliente, Fecha y Total */}
-      <div className="flex justify-between items-center mb-2">
+    <div className="bg-white rounded-lg shadow p-4 mb-4">
+      {/* Cabecera de la card */}
+      <div className="flex justify-between items-center">
         <div>
           <p className="font-semibold text-lg">Pedido #{order.shortCode}</p>
-          <p className="text-sm text-gray-500">{formatDateTime(order.createdAt)}</p>
-          <p className="text-sm text-gray-700">Cliente: {order.customerName}</p>
+          <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+          <p className="text-sm text-gray-600">
+            {order.customerName} ({order.customerEmail})
+          </p>
         </div>
         <div className="text-right">
           <p className="font-medium">{order.total.toFixed(2)} €</p>
-          <p className="text-sm font-semibold">
-            {order.status === 'pending' && '⚠️ PENDIENTE'}
-            {order.status === 'ready' && '✅ LISTO'}
-            {order.status === 'collected' && '🎉 RECOGIDO'}
+          <p className={`text-sm font-semibold ${info.color}`}>
+            {info.emoji} {info.label}
           </p>
         </div>
       </div>
 
-      {/* Contadores de tiempo */}
-      <div className="mb-3 text-sm space-y-1">
-        {order.status === 'pending' && (
-          <p className="text-gray-600">
-            ⏳ En “pending”:&nbsp;
-            <span className="font-medium">{pendingDuration}</span>
-          </p>
+      {/* Temporizadores */}
+      <div className="mt-2 flex space-x-4">
+        <div>
+          <span className="text-xs text-gray-600">Tiempo preparación:</span>{' '}
+          <span className="font-medium">{timerPending}</span>
+        </div>
+        {order.status !== 'pending' && (
+          <div>
+            <span className="text-xs text-gray-600">Tiempo recogida:</span>{' '}
+            <span className="font-medium">{timerReady}</span>
+          </div>
         )}
-
-        {order.status === 'ready' && (
-          <>
-            <p className="text-gray-600">
-              ✅ Preparado en:&nbsp;
-              <span className="font-medium">{pendingDuration}</span>
-            </p>
-            <p className="text-gray-600">
-              ⏳ En “ready”:&nbsp;
-              <span className="font-medium">{readyDuration}</span>
-            </p>
-          </>
-        )}
-
-        {order.status === 'collected' && (
-          <>
-            <p className="text-gray-600">
-              ✅ Preparado en:&nbsp;
-              <span className="font-medium">{pendingDuration}</span>
-            </p>
-            <p className="text-gray-600">
-              ✅ Espera en “ready”:&nbsp;
-              <span className="font-medium">{readyDuration}</span>
-            </p>
-            <p className="text-gray-600">
-              🎉 Recogido a las:&nbsp;
-              <span className="font-medium">{formatDateTime(order.collectedAt!)}</span>
-            </p>
-          </>
+        {order.status === 'collected' && order.collectedAt && (
+          <div>
+            <span className="text-xs text-gray-600">Recogido el</span>{' '}
+            <span className="font-medium">{formatDate(order.collectedAt)}</span>
+          </div>
         )}
       </div>
 
-      {/* Botón para avanzar estado */}
-      <div className="mt-auto flex justify-end">
+      {/* Líneas / detalle */}
+      {!collapsed && (
+        <div className="mt-3 border-t pt-3">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-gray-600">
+                <th className="pb-1">Producto</th>
+                <th className="pb-1">Cant.</th>
+                <th className="pb-1">Precio ud.</th>
+                <th className="pb-1">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map((it: OrderItem) => (
+                <tr key={it.productId} className="border-b">
+                  <td className="py-1">{it.productName}</td>
+                  <td className="py-1">{it.quantity}</td>
+                  <td className="py-1">{it.unitPrice.toFixed(2)} €</td>
+                  <td className="py-1 font-medium">{it.subtotal.toFixed(2)} €</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Botones: Show Less/Show More + cambio de estado */}
+      <div className="mt-3 flex justify-end items-center space-x-2">
+        <button
+          onClick={() => setCollapsed(c => !c)}
+          className="text-sm text-blue-500 hover:underline"
+        >
+          {collapsed ? 'Ver productos ▼' : 'Ocultar productos ▲'}
+        </button>
+
+        {/* Botón de cambio de estado: solo aparece en pending/ready */}
         {order.status === 'pending' && (
           <button
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
-            onClick={() => onMarkReady(order.orderId)}
+            onClick={handleStateChange}
+            className="ml-2 px-4 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200"
           >
-            ✅ Marcar listo
+            Pedido listo ✔
           </button>
         )}
         {order.status === 'ready' && (
           <button
-            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
-            onClick={() => onMarkCollected(order.orderId)}
+            onClick={handleStateChange}
+            className="ml-2 px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200"
           >
-            ✅ Marcar recogido
+            Pedido recogido ✔
           </button>
-        )}
-        {order.status === 'collected' && (
-          <span className="text-sm text-gray-500 italic">Pedido cerrado</span>
         )}
       </div>
     </div>

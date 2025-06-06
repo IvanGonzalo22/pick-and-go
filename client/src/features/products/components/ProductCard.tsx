@@ -39,7 +39,7 @@ export function ProductCard({
         <img
           src={product.imageUrl}
           alt={product.name}
-          className={`h-32 object-cover rounded mb-2 ${!product.visible ? 'opacity-50' : ''}`}
+          className={`w-full h-32 object-cover rounded mb-2 ${!product.visible ? 'opacity-50' : ''}`}
         />
         {!product.visible && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
