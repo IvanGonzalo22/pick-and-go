@@ -17,7 +17,7 @@ interface CartItemDto {
 
 // Tipo que usa el frontend
 export interface CartItem {
-  id: string;          // <-- mapeado desde productId
+  id: string;
   name: string;
   price: number;
   stock: number;
@@ -36,7 +36,7 @@ export function useCart() {
     setLoading(true);
     try {
       const res = await API.get<CartItemDto[]>('/cart');
-      // Mapeamos productId → id
+      
       const mapped = res.data.map(ci => ({
         id:         ci.productId,
         name:       ci.name,

@@ -31,48 +31,53 @@ export function OrderCard({ order, onMarkReady, onMarkCollected }: OrderCardProp
     return `${hours}h ${minutes}m`;
   };
 
-  // Actualiza temporizadores mientras el pedido está en “pending” o “ready”
+  // Actualiza temporizadores congelando el de pending al pasar a ready,
+  // y el de ready al pasar a collected.
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (order.status === 'pending') {
-      // Solo mostrará el timerPending en tiempo real
-      interval = setInterval(() => {
-        setTimerPending(computeElapsed(order.pendingAt));
-      }, 60_000);
-      // Calcular inmediatamente
-      setTimerPending(computeElapsed(order.pendingAt));
-      // Ready timer queda vacío
-      setTimerReady('');
-    } else if (order.status === 'ready') {
-      // Pending queda congelado en la última lectura
-      setTimerPending(computeElapsed(order.pendingAt));
-      // Ready se va actualizando
-      interval = setInterval(() => {
-        if (order.readyAt) {
-          setTimerReady(computeElapsed(order.readyAt));
-        }
-      }, 60_000);
-      if (order.readyAt) {
-        setTimerReady(computeElapsed(order.readyAt));
-      }
-    } else {
-      // Collected: ambos congelados
-      setTimerPending(computeElapsed(order.pendingAt));
-      if (order.readyAt) {
-        setTimerReady(computeElapsed(order.readyAt));
-      }
-    }
 
-    return () => {
-      if (interval) clearInterval(interval);
+    // Parseamos fechas una sola vez:
+    const pendingMs = new Date(order.pendingAt + 'Z').getTime();
+    const readyMs = order.readyAt ? new Date(order.readyAt + 'Z').getTime() : null;
+    const collectedMs = order.collectedAt ? new Date(order.collectedAt + 'Z').getTime() : null;
+
+    // Calcula diferencia entre dos timestamps
+    const computeBetween = (start: number, end: number) => {
+      const diffMs = end - start;
+      if (diffMs < 0) return '0h 0m';
+      const totalMinutes = Math.floor(diffMs / 60000);
+      return `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`;
     };
+
+    if (order.status === 'pending') {
+      // Actualiza "pending" en tiempo real
+      const updatePending = () => setTimerPending(computeElapsed(order.pendingAt + 'Z'));
+      updatePending();
+      interval = setInterval(updatePending, 60_000);
+      setTimerReady('');
+
+    } else if (order.status === 'ready' && readyMs !== null) {
+      // Pending se congela: desde pendingAt hasta readyAt
+      setTimerPending(computeBetween(pendingMs, readyMs));
+
+      // Ready se actualiza en tiempo real
+      const updateReady = () => setTimerReady(computeBetween(readyMs, Date.now()));
+      updateReady();
+      interval = setInterval(updateReady, 60_000);
+
+    } else if (order.status === 'collected' && readyMs !== null && collectedMs !== null) {
+      // Ambos congelados: pendingAt→readyAt y readyAt→collectedAt
+      setTimerPending(computeBetween(pendingMs, readyMs));
+      setTimerReady(computeBetween(readyMs, collectedMs));
+    }
+    return () => clearInterval(interval);
   }, [order]);
 
   // Color/emoji según estado
   const statusInfo = {
-    pending:   { label: 'PENDIENTE',  emoji: '⚠️', color: 'text-orange-600' },
-    ready:     { label: 'LISTO',      emoji: '✅', color: 'text-green-600'   },
-    collected: { label: 'RECOGIDO',   emoji: '☑️', color: 'text-blue-600'  },
+    pending: { label: 'PENDIENTE', emoji: '⚠️', color: 'text-orange-600' },
+    ready: { label: 'LISTO', emoji: '✅', color: 'text-green-600' },
+    collected: { label: 'RECOGIDO', emoji: '☑️', color: 'text-blue-600' },
   } as const;
   const info = statusInfo[order.status];
 
@@ -92,7 +97,7 @@ export function OrderCard({ order, onMarkReady, onMarkCollected }: OrderCardProp
       <div className="flex justify-between items-center">
         <div>
           <p className="font-semibold text-lg">Pedido #{order.shortCode}</p>
-          <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+          <p className="text-sm text-gray-500">{formatDate(order.createdAt + 'Z')}</p>
           <p className="text-sm text-gray-600">
             {order.customerName} ({order.customerEmail})
           </p>
@@ -120,7 +125,7 @@ export function OrderCard({ order, onMarkReady, onMarkCollected }: OrderCardProp
         {order.status === 'collected' && order.collectedAt && (
           <div>
             <span className="text-xs text-gray-600">Recogido el</span>{' '}
-            <span className="font-medium">{formatDate(order.collectedAt)}</span>
+            <span className="font-medium">{formatDate(order.collectedAt + 'Z')}</span>
           </div>
         )}
       </div>

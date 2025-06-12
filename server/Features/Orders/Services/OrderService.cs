@@ -35,6 +35,14 @@ namespace server.Features.Orders.Services
             if (cartItems == null || !cartItems.Any())
                 throw new InvalidOperationException("El carrito está vacío.");
 
+            // NUEVO: Validar que ninguno de los productos esté oculto
+            var productIds = cartItems.Select(ci => ci.ProductId).ToList();
+            bool hasHidden = await _db.Products
+                .Where(p => productIds.Contains(p.Id))
+                .AnyAsync(p => !p.Visible);
+            if (hasHidden)
+                throw new InvalidOperationException("Uno de los productos ya no está disponible.");
+
             decimal total = cartItems.Sum(ci => ci.Price * ci.Quantity);
 
             var user = await _db.Users.FindAsync(userId);

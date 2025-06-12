@@ -116,6 +116,14 @@ namespace server.Features.Cart.Services
 
             if (conflicts.Any())
                 throw new InvalidOperationException($"Stock insuficiente:{conflicts.First().available}");
+                
+             // NO FUNCIONA: Validar que ninguno de los productos esté oculto
+            var productIds = cart.Select(ci => ci.ProductId).ToList();
+            bool hasHidden = await _db.Products
+                .Where(p => productIds.Contains(p.Id))
+                .AnyAsync(p => !p.Visible);
+            if (hasHidden)
+                throw new InvalidOperationException("Uno de los productos ya no está disponible");
         }
 
         // 6. Checkout definitivo

@@ -12,7 +12,7 @@ export function HistoryCard({ order, onRepeat }: HistoryCardProps) {
 
   // Formatea una fecha ISO a “DD/MM/YYYY HH:mm”
   const formatDate = (iso: string) => {
-    const d = new Date(iso);
+    const d = new Date(iso + 'Z');
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
@@ -20,7 +20,7 @@ export function HistoryCard({ order, onRepeat }: HistoryCardProps) {
   // Color/emoji según estado
   const statusInfo = {
     pending: { label: 'PENDIENTE', emoji: '⚠️', color: 'text-orange-600' },
-    ready:   { label: 'LISTO',     emoji: '✅', color: 'text-green-600' },
+    ready: { label: 'LISTO', emoji: '✅', color: 'text-green-600' },
     collected: { label: 'RECOGIDO', emoji: '☑️', color: 'text-blue-600' }
   } as const;
 

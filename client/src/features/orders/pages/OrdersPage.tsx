@@ -1,10 +1,16 @@
-// src/features/orders/pages/OrdersPage.tsx
 import React from 'react';
 import { useOrders, Order } from '../hooks/useOrders';
 import { OrderCard } from '../components/OrderCard';
 
 export default function OrdersPage() {
-  const { orders, loading, error, markReady, markCollected } = useOrders();
+  const {
+    orders,
+    loading,
+    error,
+    fetchOrders,
+    markReady,
+    markCollected
+  } = useOrders();
 
   // Separar por estado
   const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -36,7 +42,15 @@ export default function OrdersPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Columna “Pendientes” */}
         <div>
-          <h3 className="text-xl font-semibold mb-3">Pendientes</h3>
+          <div className="flex items-center space-x-3 mb-3">
+            <h3 className="text-xl font-semibold">Pendientes</h3>
+            <button
+              onClick={fetchOrders}
+              className="flex items-center space-x-1 px-2 py-0.5 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors duration-200"
+            >
+              <span>Refrescar</span>
+            </button>
+          </div>
           {pendingOrders.length === 0 ? (
             <p className="text-gray-500">No hay pedidos pendientes.</p>
           ) : (
@@ -51,7 +65,7 @@ export default function OrdersPage() {
                     alert(e.message);
                   }
                 }}
-                onMarkCollected={() => Promise.resolve()} // no aplica en pending
+                onMarkCollected={() => Promise.resolve()}
               />
             ))
           )}
@@ -67,7 +81,7 @@ export default function OrdersPage() {
               <OrderCard
                 key={order.orderId}
                 order={order}
-                onMarkReady={() => Promise.resolve()} // no aplica en ready
+                onMarkReady={() => Promise.resolve()}
                 onMarkCollected={async (id) => {
                   try {
                     await markCollected(id);
@@ -90,8 +104,8 @@ export default function OrdersPage() {
               <OrderCard
                 key={order.orderId}
                 order={order}
-                onMarkReady={() => Promise.resolve()}     // no aplica en collected
-                onMarkCollected={() => Promise.resolve()} // no aplica en collected
+                onMarkReady={() => Promise.resolve()}
+                onMarkCollected={() => Promise.resolve()}
               />
             ))
           )}
