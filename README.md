@@ -39,26 +39,12 @@ Employees define which products are available each day based on ingredients, and
 
 ---
 
-### 1. Clone the repo
+Clone the repo
 
 ```bash
 git clone https://github.com/IvanGonzalo22/pick-and-go.git
 cd pick-and-go
 ```
-
-### 2. Environment variables
-
-Create a `.env` file based on this template:
-
-```env
-# Frontend (client)
-VITE_API_URL=https://localhost:5001/api
-
-# Backend (server)
-DB_CONNECTION=Server=YOUR_SERVER;Database=PickAndGoDB;User Id=YOUR_USER;Password=YOUR_PASSWORD;
-```
-
----
 
 ## ▶️ Run the app
 
