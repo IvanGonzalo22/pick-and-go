@@ -1,5 +1,5 @@
 
-# 🧾 Pick & Go — TFG 2025
+# 🧾 Pick & Go
 
 **Pick & Go** is a progressive web application (PWA) designed to streamline food ordering during school breaks.  
 Employees define which products are available each day based on ingredients, and clients place orders to avoid unnecessary queues.
