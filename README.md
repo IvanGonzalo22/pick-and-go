@@ -6,7 +6,7 @@ Employees define which products are available each day based on ingredients, and
 
 ---
 
-## 🚀 Tech Stack
+## 🚀 Stack
 
 ### Frontend
 - React + TypeScript
@@ -23,7 +23,7 @@ Employees define which products are available each day based on ingredients, and
 
 ## 🔧 Local Setup
 
-### 0. Prerequisites
+### Prerequisites
 
 - **Node.js** (recommended LTS version)  
   https://nodejs.org/
